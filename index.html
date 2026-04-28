@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StyleHub · Marketing Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --offblack: #111111;
+    --dark: #1a1a1a;
+    --mid: #2d2d2d;
+    --gray: #888;
+    --light: #e8e8e8;
+    --xlight: #f5f5f5;
+    --white: #ffffff;
+    --accent: #a855f7;
+    --accent-light: #f3e8ff;
+    --green: #7c3aed;
+    --green-light: #ede9fe;
+    --red: #8b1a1a;
+    --red-light: #f5dcdc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid #1e1e1e;
+    position: sticky;
+    top: 0;
+    background: var(--black);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--accent); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .nav-tag {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 48px;
+    border-bottom: 1px solid #1a1a1a;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  select {
+    background: var(--dark);
+    border: 1px solid #2d2d2d;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 32px 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color 0.2s;
+  }
+
+  select:hover { border-color: var(--accent); }
+
+  /* MAIN */
+  main { padding: 40px 48px; }
+
+  /* HERO */
+  .hero {
+    margin-bottom: 48px;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.05;
+    color: var(--white);
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    margin-bottom: 40px;
+  }
+
+  .kpi-card {
+    background: var(--offblack);
+    padding: 28px 24px;
+    transition: background 0.2s;
+  }
+
+  .kpi-card:hover { background: #141414; }
+
+  .kpi-label {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .kpi-accent { color: var(--accent); }
+  .kpi-green { color: #a78bfa; }
+  .kpi-red { color: #f472b6; }
+
+  /* CHARTS GRID */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .chart-card {
+    background: var(--offblack);
+    border: 1px solid #1e1e1e;
+    padding: 28px;
+  }
+
+  .chart-card.full { grid-column: 1 / -1; }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+
+  .chart-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .chart-subtitle {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--white);
+  }
+
+  .chart-container {
+    position: relative;
+    height: 260px;
+  }
+
+  /* TABLE */
+  .table-card {
+    background: var(--offblack);
+    border: 1px solid #1e1e1e;
+    margin-bottom: 24px;
+  }
+
+  .table-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid #1e1e1e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+    padding: 14px 28px;
+    text-align: left;
+    border-bottom: 1px solid #1e1e1e;
+    font-weight: 400;
+  }
+
+  td {
+    padding: 14px 28px;
+    font-size: 13px;
+    border-bottom: 1px solid #111;
+    color: #ccc;
+  }
+
+  tr:hover td { background: #111; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-red   { background: var(--red-light);   color: var(--red); }
+  .badge-gray  { background: #2d2d2d; color: var(--gray); }
+
+  .roi-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .roi-bar {
+    height: 4px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* LOADING */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid #1e1e1e;
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--gray);
+  }
+
+  .footer-right {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #333;
+    text-transform: uppercase;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav, .filters, main, footer { padding-left: 24px; padding-right: 24px; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">STYLE<span>HUB</span></div>
+  <div class="nav-right">
+    <span class="nav-tag"><span class="status-dot"></span>Live Data</span>
+    <span class="nav-tag">Marketing Analytics 2023</span>
+  </div>
+</nav>
+
+<div class="filters">
+  <span class="filter-label">Filter</span>
+
+  <select id="filter-channel" onchange="applyFilters()">
+    <option value="">Alle Kanäle</option>
+    <option value="Email">Email</option>
+    <option value="Google Ads">Google Ads</option>
+    <option value="Social Media">Social Media</option>
+    <option value="Display">Display</option>
+  </select>
+
+  <select id="filter-segment" onchange="applyFilters()">
+    <option value="">Alle Segmente</option>
+    <option value="B2B">B2B</option>
+    <option value="B2C">B2C</option>
+    <option value="Neukunden">Neukunden</option>
+    <option value="Bestandskunden">Bestandskunden</option>
+  </select>
+
+  <select id="filter-region" onchange="applyFilters()">
+    <option value="">Alle Regionen</option>
+    <option value="Nord">Nord</option>
+    <option value="Süd">Süd</option>
+    <option value="West">West</option>
+    <option value="Ost">Ost</option>
+  </select>
+</div>
+
+<main>
+  <div class="hero">
+    <div class="hero-eyebrow">StyleHub · Kampagnen-Analyse 2023</div>
+    <h1 class="hero-title">Der Durchschnitt lügt.<br><em>Die Daten zeigen die Wahrheit.</em></h1>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Gesamtumsatz</div>
+      <div class="kpi-value" id="kpi-revenue">—</div>
+      <div class="kpi-sub">alle Kampagnen 2023</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Gesamtkosten</div>
+      <div class="kpi-value" id="kpi-cost">—</div>
+      <div class="kpi-sub">Mediabudget gesamt</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ø ROI</div>
+      <div class="kpi-value kpi-accent" id="kpi-roi">—</div>
+      <div class="kpi-sub" id="kpi-roi-sub">Achtung: Durchschnitt täuscht!</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ø Cost per Lead</div>
+      <div class="kpi-value" id="kpi-cpl">—</div>
+      <div class="kpi-sub">stark kanalabhängig</div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Kanal-Vergleich</div>
+          <div class="chart-subtitle">ROI nach Kanal</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-roi"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Effizienz</div>
+          <div class="chart-subtitle">CTR & Conversion Rate</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-ctr"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Zeitverlauf</div>
+          <div class="chart-subtitle">Umsatz vs. Kosten (monatlich)</div>
+        </div>
+      </div>
+      <div class="chart-container" style="height: 220px;">
+        <canvas id="chart-time"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div>
+        <div class="chart-title">Kampagnen-Detail</div>
+        <div class="chart-subtitle">Alle Kampagnen sortiert nach ROI</div>
+      </div>
+    </div>
+    <div id="table-loading" class="loading">
+      <div class="spinner"></div>
+      <div class="loading-text">Lade Daten aus Supabase...</div>
+    </div>
+    <table id="campaign-table" style="display:none">
+      <thead>
+        <tr>
+          <th>Kampagne</th>
+          <th>Kanal</th>
+          <th>Segment</th>
+          <th>Kosten</th>
+          <th>Umsatz</th>
+          <th>ROI %</th>
+          <th>CTR %</th>
+          <th>Conv. Rate</th>
+          <th>CPL €</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-left">StyleHub</div>
+  <div class="footer-right">Business Intelligence · THWS · WS 2025/26</div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// KONFIGURATION – hier deine Supabase-Daten eintragen!
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://rvduoisgsexfslpyxqon.supabase.co';   // z.B. https://xxxx.supabase.co
+const SUPABASE_KEY  = 'sb_publishable_J6V-29lcbPyfm8zJRrRcUA_N75fqMAi';         // aus Supabase → Settings → API Keys → anon
+
+// ══════════════════════════════════════════
+// SUPABASE CLIENT
+// ══════════════════════════════════════════
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let allData = [];
+let charts  = {};
+
+// ══════════════════════════════════════════
+// DATEN LADEN
+// ══════════════════════════════════════════
+async function loadData() {
+  const { data, error } = await db
+    .from('fact_campaign_daily')
+    .select('*');
+
+  if (error) {
+    console.error('Supabase Fehler:', error);
+    document.getElementById('table-loading').innerHTML =
+      '<div class="loading-text" style="color:#c8553d">Verbindungsfehler – bitte Supabase-Zugangsdaten prüfen</div>';
+    return;
+  }
+
+  allData = data;
+  applyFilters();
+}
+
+// ══════════════════════════════════════════
+// FILTER
+// ══════════════════════════════════════════
+function applyFilters() {
+  const ch  = document.getElementById('filter-channel').value;
+  const seg = document.getElementById('filter-segment').value;
+  const reg = document.getElementById('filter-region').value;
+
+  const filtered = allData.filter(r =>
+    (!ch  || r.channel         === ch)  &&
+    (!seg || r.target_segment  === seg) &&
+    (!reg || r.region          === reg)
+  );
+
+  updateKPIs(filtered);
+  updateROIChart(filtered);
+  updateCTRChart(filtered);
+  updateTimeChart(filtered);
+  updateTable(filtered);
+}
+
+// ══════════════════════════════════════════
+// KPIs
+// ══════════════════════════════════════════
+function fmt(n, dec = 0) {
+  return new Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: dec,
+    maximumFractionDigits: dec
+  }).format(n);
+}
+
+function updateKPIs(data) {
+  const revenue = data.reduce((s, r) => s + r.revenue, 0);
+  const cost    = data.reduce((s, r) => s + r.cost,    0);
+  const roi     = cost > 0 ? (revenue - cost) / cost * 100 : 0;
+  const totalConv = data.reduce((s, r) => s + r.conversions, 0);
+  const cpl       = totalConv > 0 ? cost / totalConv : 0;
+
+  document.getElementById('kpi-revenue').textContent = fmt(revenue) + ' €';
+  document.getElementById('kpi-cost').textContent    = fmt(cost)    + ' €';
+  document.getElementById('kpi-roi').textContent     = (roi >= 0 ? '+' : '') + fmt(roi, 1) + ' %';
+  document.getElementById('kpi-cpl').textContent     = fmt(cpl, 0) + ' €';
+}
+
+// ══════════════════════════════════════════
+// ROI CHART
+// ══════════════════════════════════════════
+function updateROIChart(data) {
+  const channels = ['Email', 'Google Ads', 'Social Media', 'Display'];
+  const values   = channels.map(ch => {
+    const rows = data.filter(r => r.channel === ch);
+    if (!rows.length) return 0;
+    const rev  = rows.reduce((s, r) => s + r.revenue, 0);
+    const cost = rows.reduce((s, r) => s + r.cost,    0);
+    return cost > 0 ? (rev - cost) / cost * 100 : 0;
+  });
+
+  const colors = values.map(v => v >= 0 ? '#7c3aed' : '#db2777');
+
+  if (charts.roi) charts.roi.destroy();
+  charts.roi = new Chart(document.getElementById('chart-roi'), {
+    type: 'bar',
+    data: {
+      labels: channels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 2,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ROI: ' + (ctx.raw >= 0 ? '+' : '') + fmt(ctx.raw, 1) + ' %'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#1e1e1e' },
+          ticks: { color: '#888', font: { family: 'DM Sans', size: 11 },
+            callback: v => (v >= 0 ? '+' : '') + fmt(v, 0) + '%'
+          },
+          border: { color: '#1e1e1e' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#ccc', font: { family: 'DM Sans', size: 12 } },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// CTR CHART
+// ══════════════════════════════════════════
+function updateCTRChart(data) {
+  const channels = ['Email', 'Google Ads', 'Social Media', 'Display'];
+  const ctrs     = channels.map(ch => {
+    const rows = data.filter(r => r.channel === ch);
+    return rows.length ? rows.reduce((s, r) => s + r.ctr_pct, 0) / rows.length : 0;
+  });
+  const convs = channels.map(ch => {
+    const rows = data.filter(r => r.channel === ch);
+    return rows.length ? rows.reduce((s, r) => s + r.conversion_rate, 0) / rows.length : 0;
+  });
+
+  if (charts.ctr) charts.ctr.destroy();
+  charts.ctr = new Chart(document.getElementById('chart-ctr'), {
+    type: 'bar',
+    data: {
+      labels: channels,
+      datasets: [
+        {
+          label: 'Ø CTR %',
+          data: ctrs,
+          backgroundColor: '#a855f7',
+          borderRadius: 2,
+          borderSkipped: false,
+        },
+        {
+          label: 'Ø Conv. Rate %',
+          data: convs,
+          backgroundColor: '#ec4899',
+          borderRadius: 2,
+          borderSkipped: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: '#888',
+            font: { family: 'DM Sans', size: 11 },
+            boxWidth: 12,
+            padding: 16
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw, 2) + ' %'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#888', font: { family: 'DM Sans', size: 11 } },
+          border: { display: false }
+        },
+        y: {
+          grid: { color: '#1e1e1e' },
+          ticks: { color: '#888', font: { family: 'DM Sans', size: 11 },
+            callback: v => fmt(v, 1) + '%'
+          },
+          border: { color: '#1e1e1e' }
+        }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// TIME CHART
+// ══════════════════════════════════════════
+function updateTimeChart(data) {
+  const monthly = {};
+  data.forEach(r => {
+    const m = r.date_id.substring(0, 7);
+    if (!monthly[m]) monthly[m] = { revenue: 0, cost: 0 };
+    monthly[m].revenue += r.revenue;
+    monthly[m].cost    += r.cost;
+  });
+
+  const labels   = Object.keys(monthly).sort();
+  const revenues = labels.map(m => monthly[m].revenue);
+  const costs    = labels.map(m => monthly[m].cost);
+
+  if (charts.time) charts.time.destroy();
+  charts.time = new Chart(document.getElementById('chart-time'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Umsatz',
+          data: revenues,
+          borderColor: '#7c3aed',
+          backgroundColor: 'rgba(124,58,237,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: '#7c3aed',
+          borderWidth: 2,
+        },
+        {
+          label: 'Kosten',
+          data: costs,
+          borderColor: '#ec4899',
+          backgroundColor: 'rgba(236,72,153,0.06)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: '#ec4899',
+          borderWidth: 2,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: '#888',
+            font: { family: 'DM Sans', size: 11 },
+            boxWidth: 24,
+            padding: 16
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + ctx.dataset.label + ': ' + fmt(ctx.raw) + ' €'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#111' },
+          ticks: { color: '#888', font: { family: 'DM Sans', size: 10 }, maxRotation: 0 },
+          border: { color: '#1e1e1e' }
+        },
+        y: {
+          grid: { color: '#1e1e1e' },
+          ticks: { color: '#888', font: { family: 'DM Sans', size: 10 },
+            callback: v => fmt(v) + ' €'
+          },
+          border: { color: '#1e1e1e' }
+        }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// TABLE
+// ══════════════════════════════════════════
+async function updateTable(data) {
+  const { data: campaigns } = await db.from('dim_campaign').select('*');
+  const campMap = {};
+  if (campaigns) campaigns.forEach(c => campMap[c.campaign_id] = c.campaign_name);
+
+  const grouped = {};
+  data.forEach(r => {
+    const id = r.campaign_id;
+    if (!grouped[id]) grouped[id] = {
+      name: campMap[id] || id,
+      channel: r.channel,
+      segment: r.target_segment,
+      cost: 0, revenue: 0,
+      ctr: [], conv: [], cpl: []
+    };
+    grouped[id].cost    += r.cost;
+    grouped[id].revenue += r.revenue;
+    grouped[id].ctr.push(r.ctr_pct);
+    grouped[id].conv.push(r.conversion_rate);
+    if (r.cost_per_lead > 0) grouped[id].cpl.push(r.cost_per_lead);
+  });
+
+  const rows = Object.values(grouped).map(c => ({
+    ...c,
+    roi: c.cost > 0 ? (c.revenue - c.cost) / c.cost * 100 : 0,
+    avgCtr:  c.ctr.reduce((s, v) => s + v, 0) / c.ctr.length,
+    avgConv: c.conv.reduce((s, v) => s + v, 0) / c.conv.length,
+    avgCpl:  c.cpl.length ? c.cpl.reduce((s, v) => s + v, 0) / c.cpl.length : 0,
+  })).sort((a, b) => b.roi - a.roi);
+
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = rows.map(r => {
+    const roiPos   = r.roi >= 0;
+    const barW     = Math.min(Math.abs(r.roi) / 15, 80);
+    const barColor = roiPos ? '#7c3aed' : '#db2777';
+    return `
+      <tr>
+        <td style="color:#fff;font-weight:500">${r.name}</td>
+        <td>${r.channel}</td>
+        <td><span class="badge badge-gray">${r.segment}</span></td>
+        <td>${fmt(r.cost)} €</td>
+        <td>${fmt(r.revenue)} €</td>
+        <td>
+          <div class="roi-bar-wrap">
+            <div class="roi-bar" style="width:${barW}px;background:${barColor}"></div>
+            <span class="${roiPos ? 'kpi-green' : 'kpi-red'}">
+              ${roiPos ? '+' : ''}${fmt(r.roi, 1)} %
+            </span>
+          </div>
+        </td>
+        <td>${fmt(r.avgCtr, 2)} %</td>
+        <td>${fmt(r.avgConv, 2)} %</td>
+        <td>${fmt(r.avgCpl, 0)} €</td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('table-loading').style.display  = 'none';
+  document.getElementById('campaign-table').style.display = 'table';
+}
+
+// START
+loadData();
+</script>
+</body>
+</html>
