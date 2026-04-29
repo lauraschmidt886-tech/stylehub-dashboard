@@ -159,6 +159,16 @@ footer{padding:24px 48px;border-top:1px solid #1a1a1a;display:flex;justify-conte
   </section>
 
   <section>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Gesamtumsatz</div><div class="kpi-value" id="kpi-rev">—</div><div class="kpi-sub">alle Kampagnen 2023</div></div>
+      <div class="kpi-card"><div class="kpi-label">Gesamtkosten</div><div class="kpi-value" id="kpi-cost">—</div><div class="kpi-sub">Mediabudget gesamt</div></div>
+      <div class="kpi-card"><div class="kpi-label">Ø ROI</div><div class="kpi-value kpi-pink" id="kpi-roi">—</div><div class="kpi-sub">Durchschnitt täuscht!</div></div>
+      <div class="kpi-card"><div class="kpi-label">Ø Cost per Lead</div><div class="kpi-value" id="kpi-cpl">—</div><div class="kpi-sub">stark kanalabhängig</div></div>
+    </div>
+  </section>
+
+
+  <section>
     <div class="section-title">🏆 Top & Flop Kampagne</div>
     <div class="topflop-grid">
       <div class="topflop-card top">
@@ -173,15 +183,6 @@ footer{padding:24px 48px;border-top:1px solid #1a1a1a;display:flex;justify-conte
         <div class="topflop-meta" id="flop-meta">—</div>
         <div class="topflop-roi" id="flop-roi">—</div>
       </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-label">Gesamtumsatz</div><div class="kpi-value" id="kpi-rev">—</div><div class="kpi-sub">alle Kampagnen 2023</div></div>
-      <div class="kpi-card"><div class="kpi-label">Gesamtkosten</div><div class="kpi-value" id="kpi-cost">—</div><div class="kpi-sub">Mediabudget gesamt</div></div>
-      <div class="kpi-card"><div class="kpi-label">Ø ROI</div><div class="kpi-value kpi-pink" id="kpi-roi">—</div><div class="kpi-sub">Durchschnitt täuscht!</div></div>
-      <div class="kpi-card"><div class="kpi-label">Ø Cost per Lead</div><div class="kpi-value" id="kpi-cpl">—</div><div class="kpi-sub">stark kanalabhängig</div></div>
     </div>
   </section>
 
@@ -208,7 +209,7 @@ footer{padding:24px 48px;border-top:1px solid #1a1a1a;display:flex;justify-conte
         <div><div class="chart-title">Optimale Budgetverteilung</div><div class="chart-subtitle">Basierend auf echtem Kanal-ROI</div></div>
         <div class="budget-input-wrap">
           <span style="font-size:11px;color:var(--gray)">Gesamtbudget</span>
-          <input class="budget-input" type="number" id="budget-val" value="42000" oninput="updateBudget()">
+          <input class="budget-input" type="number" id="budget-val" value="825927" oninput="updateBudget()">
           <span style="font-size:13px;color:var(--gray)">€</span>
         </div>
       </div>
@@ -359,7 +360,7 @@ function updateSegments(d){
 }
 
 function updateBudget(){
-  const total=parseFloat(document.getElementById('budget-val').value)||42000;
+  const total=parseFloat(document.getElementById("budget-val").value)||825927;
   const chData=CHANS.map(ch=>{const s=chanStats(allData,ch);return{ch,...s};});
   const pos=chData.filter(c=>c.roas>1);
   const totRoas=pos.reduce((s,c)=>s+c.roas,0);
